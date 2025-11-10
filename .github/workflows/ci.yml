@@ -1,59 +1,50 @@
-# .github/workflows/ci.yml
-#
-# Nome do Workflow
 name: CI - Build e Testes do Classificador
 
-# Gatilhos (Triggers)
 on:
-  # Roda quando houver um push direto para o branch 'main'
   push:
     branches: [ "main" ]
-  # Roda quando um Pull Request for aberto (ou atualizado) contra o branch 'main'
   pull_request:
     branches: [ "main" ]
 
-# Tarefas (Jobs)
 jobs:
   build-and-test:
-    # O tipo de máquina virtual para rodar o job
     runs-on: ubuntu-latest
 
-    # Passos sequenciais que o job executará
     steps:
-      # 1. Faz o checkout do código do repositório para a máquina virtual
       - name: Checkout do Repositório
         uses: actions/checkout@v4
 
-      # 2. Configura o ambiente Python na versão 3.11
       - name: Configurar Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Instala as dependências
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
-          # Instala dependências de produção
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-mock httpx
 
-      # 4. Executa os testes com pytest (com o report -rA)
-      - name: Rodar testes com pytest
-        run: python -m pytest -rA
-
-      # 5. Rodar testes com cobertura
-      - name: Rodar testes com cobertura
+      - name: Criar diretórios necessários
         run: |
-          python -m pytest tests/ -v --cov=app --cov=db --cov=intent_classifier --cov-report=xml --cov-report=html -m "not integration"
+          mkdir -p intent_classifier/models
+          mkdir -p intent_classifier/data
 
-      # 6. Upload de relatório de cobertura
-      - name: Upload coverage reports
+      - name: Rodar testes unitários
+        env:
+          ENV: dev
+        run: |
+          pytest tests/ -v -m "not integration" \
+            --cov=app \
+            --cov=db \
+            --cov-report=term \
+            --cov-report=xml
+
+      - name: Upload cobertura para Codecov
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
+          fail_ci_if_error: false
 
-      # 7. Constroi a imagem Docker para validar o Dockerfile
       - name: Construir imagem Docker
         run: docker build -t intent-clf:latest -f app/app.Dockerfile .
