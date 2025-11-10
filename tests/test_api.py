@@ -159,10 +159,14 @@ def test_predictions_have_valid_structure():
 @pytest.mark.integration
 def test_predict_integration_with_real_db():
     """Teste de integração com MongoDB real."""
-    load_dotenv()
-    
+    # Primeiro tenta ENV vars (CI), depois .env (local)
     mongo_uri = os.getenv("MONGO_URI")
     mongo_db = os.getenv("MONGO_DB")
+    
+    if not mongo_uri or not mongo_db:
+        load_dotenv()
+        mongo_uri = os.getenv("MONGO_URI")
+        mongo_db = os.getenv("MONGO_DB")
     
     # Skip se variáveis não estão configuradas ou têm valores placeholder
     if not mongo_uri or not mongo_db:

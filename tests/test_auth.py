@@ -124,10 +124,15 @@ def test_token_manager_delete_expired():
 def test_token_full_lifecycle():
     """Teste de integração: ciclo completo de token."""
     from dotenv import load_dotenv
-    load_dotenv()
     
+    # Primeiro tenta ENV vars (CI), depois .env (local)
     mongo_uri = os.getenv("MONGO_URI")
     mongo_db = os.getenv("MONGO_DB")
+    
+    if not mongo_uri or not mongo_db:
+        load_dotenv()
+        mongo_uri = os.getenv("MONGO_URI")
+        mongo_db = os.getenv("MONGO_DB")
     
     # Skip se variáveis não estão configuradas ou têm valores placeholder
     if not mongo_uri or not mongo_db:

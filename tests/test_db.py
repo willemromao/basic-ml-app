@@ -17,10 +17,14 @@ def test_get_mongo_collection_is_callable():
 
 def test_mongo_collection_has_methods():
     """Verifica que a collection retornada tem os métodos necessários."""
-    load_dotenv()
-    
+    # Primeiro tenta ENV vars (CI), depois .env (local)
     mongo_uri = os.getenv("MONGO_URI")
     mongo_db = os.getenv("MONGO_DB")
+    
+    if not mongo_uri or not mongo_db:
+        load_dotenv()
+        mongo_uri = os.getenv("MONGO_URI")
+        mongo_db = os.getenv("MONGO_DB")
     
     # Skip se variáveis não estão configuradas ou têm valores placeholder
     if not mongo_uri or not mongo_db:
@@ -46,9 +50,13 @@ def test_mongo_collection_has_methods():
 @pytest.mark.integration
 def test_mongo_connection_string_loaded():
     """Verifica que a string de conexão MongoDB foi carregada."""
-    load_dotenv()
-    
+    # Primeiro tenta ENV vars (CI), depois .env (local)
     mongo_uri = os.getenv("MONGO_URI")
+    
+    if not mongo_uri:
+        load_dotenv()
+        mongo_uri = os.getenv("MONGO_URI")
+    
     assert mongo_uri is not None, "MONGO_URI não configurado"
     assert "mongodb" in mongo_uri.lower()
 
@@ -56,10 +64,14 @@ def test_mongo_connection_string_loaded():
 @pytest.mark.integration
 def test_mongo_insert_and_retrieve():
     """Testa inserção e recuperação no MongoDB."""
-    load_dotenv()
-    
+    # Primeiro tenta ENV vars (CI), depois .env (local)
     mongo_uri = os.getenv("MONGO_URI")
     mongo_db = os.getenv("MONGO_DB")
+    
+    if not mongo_uri or not mongo_db:
+        load_dotenv()
+        mongo_uri = os.getenv("MONGO_URI")
+        mongo_db = os.getenv("MONGO_DB")
     
     # Skip se variáveis não estão configuradas ou têm valores placeholder
     if not mongo_uri or not mongo_db:
