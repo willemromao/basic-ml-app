@@ -40,8 +40,22 @@ Acompanhe abaixo a linha temporal das alterações realizadas até o momento:
 >
 > **Tópicos abordados:**
 > *   Importância dos testes automatizados e da Integração Contínua (CI) no desenvolvimento de MLOps.
-> *   Criação testes unitários e de integração.
+> *   Criação testes unitários e de integração (16 testes, ~52% cobertura).
 > *   Configurar um workflow básico de GitHub Actions para executar os testes unitários e construir a imagem Docker do serviço FastAPI.
+> 
+> **Como rodar os testes:**
+> ```bash
+> # Usando o script automatizado
+> chmod +x test.sh
+> ./test.sh
+> 
+> # Ou diretamente no container
+> docker compose exec backend pytest tests/ -v -m "not integration"
+> 
+> # Com cobertura detalhada
+> docker compose exec backend pytest tests/ -v --cov=app --cov=db --cov-report=html
+> # Abra htmlcov/index.html no navegador
+> ```
 > _______________
 
 

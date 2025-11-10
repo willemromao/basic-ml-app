@@ -41,6 +41,19 @@ jobs:
       - name: Rodar testes com pytest
         run: python -m pytest -rA
 
+      # 5. Rodar testes com cobertura
+      - name: Rodar testes com cobertura
+        run: |
+          python -m pytest tests/ -v --cov=app --cov=db --cov=intent_classifier --cov-report=xml --cov-report=html -m "not integration"
+
+      # 6. Upload de relatório de cobertura
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
       # 7. Constroi a imagem Docker para validar o Dockerfile
       - name: Construir imagem Docker
         run: docker build -t intent-clf:latest -f app/app.Dockerfile .

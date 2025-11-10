@@ -12,6 +12,8 @@ wandb==0.21.0
 protobuf==5.29.5
 pydantic==2.11.7
 pytest
+pytest-cov
+pytest-mock
 uvicorn==0.38.0
 python-dotenv==1.1.1
 fastapi
