@@ -51,7 +51,7 @@ jobs:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           MONGO_DB: ${{ secrets.MONGO_DB }}
           WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
-          WANDB_PROJECT: basic-ml-app
+          WANDB_PROJECT: basic-ml-app-willem
         run: |
           pytest tests/ -v -m "integration" \
             --cov=app \
