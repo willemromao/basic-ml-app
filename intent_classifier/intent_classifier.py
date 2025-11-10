@@ -48,6 +48,10 @@ from tensorflow.keras.saving import register_keras_serializable
 
 import wandb
 from wandb.integration.keras import WandbMetricsLogger, WandbEvalCallback # WandbModelCheckpoint
+import logging
+
+# Logo após os imports, adicione:
+logger = logging.getLogger(__name__)
 
 
 @register_keras_serializable()
@@ -154,16 +158,37 @@ class IntentClassifier:
         self._load_stop_words(self.config.stop_words_file)
         # Set up one-hot encoder
         self._setup_onehot_encoder()
-        # Set up W&B
+        
+        # 6. NOVO: Configura W&B com tratamento de erros
+        self.wandb_run = None
+        
         if self.config.wandb_project:
-              # Create wandb run instance
-              self.wandb_run = wandb.init(project=self.config.wandb_project, 
-                                          config=self.config.__dict__)
-              # Create and log artifact
-              if self.examples_file is not None:
-                  artifact = wandb.Artifact("my_dataset", type="dataset")
-                  artifact.add_file(examples_file) # Assuming 'examples_file' is the dataset file
-                  self.wandb_run.log_artifact(artifact)
+            wandb_api_key = os.getenv("WANDB_API_KEY")
+            
+            if wandb_api_key:
+                try:
+                    wandb.login(key=wandb_api_key)
+                    self.wandb_run = wandb.init(
+                        project=self.config.wandb_project,
+                        name=f"model-{self.config.dataset_name}",
+                        config=self.config.__dict__
+                    )
+                    print(f"✅ W&B initialized: {self.config.wandb_project}")
+                    
+                    if self.examples_file is not None:
+                        artifact = wandb.Artifact("my_dataset", type="dataset")
+                        artifact.add_file(self.examples_file)
+                        self.wandb_run.log_artifact(artifact)
+                        print(f"✅ Dataset logged to W&B")
+                        
+                except Exception as e:
+                    print(f"⚠️  W&B failed: {e}")
+                    print("Continuing without W&B...")
+                    self.wandb_run = None
+            else:
+                print("⚠️  WANDB_API_KEY not set")
+        else:
+            print("ℹ️  W&B project not configured")
 
     def _load_config(self, config, load_model):
         if isinstance(config, str):
@@ -461,95 +486,6 @@ class IntentClassifier:
         if self.config.wandb_project and self.wandb_run:
             self.wandb_run.finish()
         return results
-    
-    def test_config_dataclass_defaults():
-        """Testa valores padrão da Config."""
-        config = Config()
-        assert config.dataset_name == "undefined"
-        assert config.min_words == 1
-        assert config.epochs == 500
-        assert config.validation_split == 0.2
-
-
-    def test_config_custom_values():
-        """Testa Config com valores customizados."""
-        config = Config(
-            dataset_name="custom",
-            epochs=10,
-            learning_rate=0.001
-        )
-        assert config.dataset_name == "custom"
-        assert config.epochs == 10
-        assert config.learning_rate == 0.001
-
-
-    def test_remove_duplicate_words():
-        """Testa função auxiliar de remoção de duplicatas."""
-        from intent_classifier import remove_duplicate_words
-        
-        result = remove_duplicate_words("hello hello world world")
-        assert result == "hello world"
-        
-        result = remove_duplicate_words("test")
-        assert result == "test"
-
-
-    def test_preprocess_empty_string(clf_minimal):
-        """Testa preprocessamento de string vazia."""
-        result = clf_minimal.preprocess_text("")
-        assert result.shape == (1,)
-
-
-    def test_preprocess_unicode_characters(clf_minimal):
-        """Testa preprocessamento com Unicode."""
-        result = clf_minimal.preprocess_text("olá çédille 日本語")
-        assert result.shape == (1,)
-
-
-    def test_predict_batch_processing(clf_local_trained):
-        """Testa predição em lote."""
-        texts = ["hello", "world", "test"]
-        results = clf_local_trained.predict(texts)
-        
-        assert len(results) == 3
-        for top_intent, probs in results:
-            assert isinstance(top_intent, str)
-            assert isinstance(probs, dict)
-
-
-    def test_model_architecture(clf_local_trained):
-        """Valida arquitetura do modelo."""
-        model = clf_local_trained.model
-        
-        # Verifica layers
-        assert len(model.layers) > 0
-        
-        # Verifica input shape
-        assert model.input_shape == (None,)
-        
-        # Verifica output shape
-        assert model.output_shape[1] == len(clf_local_trained.codes)
-
-
-    def test_save_and_load_model(clf_local_trained, tmp_path):
-        """Testa salvamento e carregamento de modelo."""
-        model_path = tmp_path / "test_model.keras"
-        
-        # Salva modelo
-        clf_local_trained.save_model(str(model_path))
-        assert model_path.exists()
-        
-        # Verifica se config foi salvo
-        config_path = str(model_path).replace(".keras", "_config.yml")
-        assert os.path.exists(config_path)
-        
-        # Carrega modelo
-        clf_loaded = IntentClassifier(load_model=str(model_path))
-        assert clf_loaded.model is not None
-        
-        # Testa predição com modelo carregado
-        result = clf_loaded.predict("test")
-        assert isinstance(result, tuple)
 
 
 # This script works as a module and as a CLI tool
