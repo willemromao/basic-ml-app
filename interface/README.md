@@ -3,5 +3,5 @@ Certifique-se de criar e ativar o ambiente via conda, exportar a variável de am
 Após isso:
 
 ```bash
-stremlit run interface.py
+streamlit run interface.py
 ```
