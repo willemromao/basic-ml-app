@@ -1,0 +1,150 @@
+# basic-ml-app
+
+Este repositório foi criado com propósitos educacionais para o curso IMD3005 - MLOPS, demonstrando como transformar um modelo treinado em um serviço web a ser implantado em produção. Atenção, pode conter pequenos bugs que precisam ser consertados. Para reportar bugs ou solicitar apoio, entre em contato por e-mail `adelson.araujo@imd.ufrn.br`.
+
+
+---
+
+## 🌱 Overview do progresso:
+
+Acompanhe abaixo a linha temporal das alterações realizadas até o momento: 
+
+> _______________
+> ### 1️⃣ : Servindo predições com FastAPI
+> Nesta aula, focamos em transformar o módulo `intent_classifier/` em uma API RESTful utilizando o FastAPI.
+>
+> **Tópicos abordados**:
+> *   Exploração dos conceitos básicos do FastAPI para construção de APIs web.
+> *   Treinamento de modelos de ML e observação dos experimentos (via integração com `W&B`) para selecionar modelo eficaz.
+> *   Demonstração de como carregar um modelo de ML previamente treinado (`.keras`) para uso em produção.
+> *   Implementação de um endpoint HTTP (`/predict`) para receber requisições e retornar predições do modelo.
+> *   Criação do arquivo `app/app.py` com a lógica essencial para inicializar o FastAPI e expor o modelo. 
+> 
+> _______________
+
+> _______________
+> ### 2️⃣ : Incorporando persistência, autenticação, e containerização
+> 
+> Nesta aula, expandimos a arquitetura do projeto para incluir persistência de dados (via Mongo-DB), autenticação simples por token de acesso, e conteinerização com Docker.
+> 
+> **Tópicos abordados:**
+> 
+> *   Discussão sobre a separação de responsabilidades (backend, ML, banco de dados, testes, DAGs) para um projeto MLOps escalável.
+> *   Persistência de dados com MongoDB e PyMongo, salvando inputs e predições.
+> *   Autenticação simples baseada em token de acesso.
+> *   Criação de um `Dockerfile` (e `docker-compose.yml`) para empacotar o serviço web em um container isolado.
+> _______________
+
+> _______________
+> ### 3️⃣ : Implementando integração contínua (CI) com GitHub actions
+>
+> **Tópicos abordados:**
+> *   Importância dos testes automatizados e da Integração Contínua (CI) no desenvolvimento de MLOps.
+> *   Criação testes unitários e de integração.
+> *   Configurar um workflow básico de GitHub Actions para executar os testes unitários e construir a imagem Docker do serviço FastAPI.
+> _______________
+
+
+> _______________
+> ### 4️⃣ : Expandindo os testes da API
+>
+> **Tópicos abordados:**
+> *   ...
+> _______________
+
+
+> _______________
+> ### 5️⃣ : Readequação ao padrão MVC (Model, View, Controller)
+>
+> Nesta etapa, a arquitetura da aplicação foi refatorada para aderir ao padrão MVC (Model-View-Controller), visando uma melhor separação de responsabilidades e facilitando a manutenção.
+>
+> **Tópicos abordados:**
+> * Identificação do problema de "Fat Controller" no `app/app.py`, que acumulava lógica de rotas, negócios e acesso a dados.
+> * Criação do `app/services.py` para conter a lógica de negócio (ex: orquestrar predições, carregar modelos, logar no banco).
+> * Ajuste do `db/engine.py` para abstrair toda a comunicação direta com o banco de dados (CRUD).
+> * Criação do `app/schemas.py`, usando Pydantic para definir o contrato (schema) das respostas JSON da API.
+> * Refatoração do `app/app.py` para atuar puramente como **Controller**, responsável apenas por receber requisições HTTP, lidar com autenticação e orquestrar as outras camadas.
+> * Centralização de toda a lógica de autenticação (ex: `conditional_auth`) no módulo `db/auth.py`.
+> _______________
+
+
+---
+
+## 🏛️ Estrutura atual do projeto
+
+```shell
+.                               # "Working directory"
+├── app/                        # Lógica do serviço web
+│   ├── app.py                  # Controller: Entrypoint da API, lida com rotas e autenticação
+│   ├── services.py             # Services: Lógica de negócio (orquestra predições, etc)
+│   ├── schema.py               # Schemas: Contratos (schemas) das respostas da API
+│   └── app.Dockerfile          # Definição do container para o serviço web
+├── db/                         # Lógica do banco de dados
+│   ├── engine.py               # Engine: Abstração para comunicação com o banco
+│   └── auth.py                 # Auth: Gestão de tokens de acesso
+├── intent_classifier/          # Scripts e arquivos do modelo de ML
+│   ├── intent_classifier.py    # Código principal para treino e avaliação do modelo
+│   ├── data/                   # Dados para treino e teste dos modelos
+│   └── models/                 # Modelos e configurações de treino
+├── dags/                       # Workflows para orquestradores (e.g., Airflow)
+│   └── README.md
+├── tests/                      # Testes unitários e de integração
+│   ├── test_app.py             
+│   └── test_intent_classifier.py 
+├── .github/                    # Workflows de CI/CD com GitHub Actions
+│   └── workflows/
+│       └── ci.yml
+├── docker-compose.yml          # Orquestração de containers (API, DB, etc)
+├── requirements.txt            # Dependências do projeto
+├── pytest.ini                  # Configurações para os testes com pytest
+├── .env.example                # Exemplo de variáveis de ambiente
+└── .gitignore                  # Arquivos e pastas a serem ignorados pelo Git
+```
+
+## ⚙️ Instruções para deploy em ambiente de teste
+
+### Localmente
+```shell
+# Crie e ative um ambiente conda com as dependências do projeto
+conda create -n intent-clf python=3.11
+conda activate intent-clf
+pip install -r requirements.txt # instalar as dependências
+## Ajuste seu .env com as variáveis de ambiente necessárias
+export ENV=dev
+## Em .env, se ENV=prod, você precisará criar um token
+## python app/auth.py create --owner="nome" --expires_in_days=365
+# Suba o serviço web e acesse-o em localhost:8000
+uvicorn app.app:app --host 0.0.0.0 --port 8000 --log-level debug
+```
+
+### Utilizando o Docker
+
+### Construindo a imagem do container
+```shell
+docker build -t intent-clf:0.1 -f app/app.Dockerfile .
+```
+
+### Executando o container 
+```shell
+docker run -d -p 8080:8000 --name intent-clf-container intent-clf:0.1
+# Checar os containers ativos
+docker ps
+# Acompanhar os logs do container
+docker logs -f intent-clf-container
+```
+Ou construa um arquivo `docker-compose.yml` (útil para execução de vários containers com um só comando) e execute:
+```shell
+docker-compose up -d
+# Checar os containers ativos
+docker ps
+# Acompanhar os logs do container
+docker logs -f intent-clf-container
+```
+Para interromper a execução do container:
+```shell
+# Parar o container
+docker stop intent-clf-container
+# Deletar o container (com -f ou --force você deleta sem precisar parar)
+docker rm -f intent-clf-container
+```
+

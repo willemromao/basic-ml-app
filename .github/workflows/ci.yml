@@ -1,0 +1,54 @@
+# .github/workflows/ci.yml
+#
+# Nome do Workflow
+name: CI - Build e Testes do Classificador
+
+# Gatilhos (Triggers)
+on:
+  # Roda quando houver um push direto para o branch 'main'
+  push:
+    branches: [ "main" ]
+  # Roda quando um Pull Request for aberto (ou atualizado) contra o branch 'main'
+  pull_request:
+    branches: [ "main" ]
+
+# Tarefas (Jobs)
+jobs:
+  build-and-test:
+    # O tipo de máquina virtual para rodar o job
+    runs-on: ubuntu-latest
+
+    # Segredos viram variáveis de ambiente que o docker-compose consome
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MONGO_DB: ${{ secrets.MONGO_DB }}
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+      WANDB_MODELS: ${{ secrets.WANDB_MODELS }}
+      ENV: dev
+
+    # Passos sequenciais que o job executará
+    steps:
+      # 1. Faz o checkout do código do repositório para a máquina virtual
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      # 2. Configura o ambiente Python na versão 3.11
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Instala as dependências
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          # Instala dependências de produção
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # 4. Executa os testes com pytest (com o report -rA)
+      - name: Rodar testes com pytest
+        run: python -m pytest -rA
+
+      # 7. Constroi a imagem Docker para validar o Dockerfile
+      - name: Construir imagem Docker
+        run: docker build -t intent-clf:latest -f app/app.Dockerfile .

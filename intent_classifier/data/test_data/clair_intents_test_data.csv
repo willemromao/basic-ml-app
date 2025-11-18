@@ -1,0 +1,36 @@
+utterance,intent
+"Clair, are you functioning properly?",ping
+"Hey Clair, you there?",ping
+"Are you online, Claire?",ping
+"Can you hear me, Clair?",ping
+"Is Clair available right now?",ping
+"How's your day going, Clair?",how_are_you
+"Clair, how are you feeling today?",how_are_you
+"Are you doing well, Clair?",how_are_you
+"Clair, how's everything with you?",how_are_you
+"How are you holding up, Claire?",how_are_you
+"What exactly are you, Clair?",who_are_you
+"Claire, what's your role here?",who_are_you
+"What kind of assistant are you, Claire?",who_are_you
+"Clair, what are you designed for?",who_are_you
+"What can you help with, Clair?",who_are_you
+"Clair, we need your input on this",ask_support
+"Claire, can you provide guidance?",ask_support
+"Clair, what would you recommend?",ask_support
+"Claire, what's your take on this?",ask_support
+"Clair, what do you think we should do?",ask_support
+"Clair, can you explain this concept?",ask_content
+"Claire, what does this term mean?",ask_content
+"Clair, how does this process work?",ask_content
+"Claire, can you clarify this for me?",ask_content
+"Clair, what's the definition of this?",ask_content
+"No thanks Clair, not interested",response_refusal
+"Claire, I'd rather not discuss this",response_refusal
+"Clair, let's skip this topic",response_refusal
+"Claire, I don't want to continue",response_refusal
+"Clair, can we talk about something else?",response_refusal
+"What's the homework for today?",normal_response
+"Can I borrow your calculator?",normal_response
+"I think I understand this now",normal_response
+"When is our next class?",normal_response
+"I need to go to the bathroom",normal_response

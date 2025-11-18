@@ -1,0 +1,31 @@
+utterance,intent
+"I'm absolutely sure I have no idea what's going on.",confusion
+"It's crystal clear that I'm lost.",confusion
+"I have a definite question about this.",confusion
+"I'm positive we're not on the same page.",confusion
+"I know for a fact that this is confusing.",confusion
+"I understand perfectly that I'm not getting this.",confusion
+"There's no doubt in my mind that I'm confused.",confusion
+"I'm 100% lost.",confusion
+"I'm certain I don't know what to do.",confusion
+"It's obvious that I'm missing something.",confusion
+"I was confused for a moment, but now I'm sure.",certainty
+"I might be wrong, but I'm pretty certain this is it.",certainty
+"It seems a bit tricky, but I've got the right answer.",certainty
+"I don't know how I know, but I know.",certainty
+"What was the question again? Oh right, the answer is definitely 42.",certainty
+"I'm not following the question, but the solution is clear.",certainty
+"This looks confusing, but I know the way.",certainty
+"I'm a bit lost on the details, but the overall concept is clear to me.",certainty
+"I'm not sure about the 'why', but I'm sure about the 'what'.",certainty
+"This is a puzzle, but I'm certain I have the final piece.",certainty
+"He said he was confused, which is interesting.",neutral_statement
+"The report states with certainty that the project is on track.",neutral_statement
+"The user guide has a section on 'common points of confusion'.",neutral_statement
+"The system log shows 'Assertion failed', which is a type of certainty check.",neutral_statement
+"The survey results show a high degree of certainty among respondents.",neutral_statement
+"The speaker expressed confusion about the data.",neutral_statement
+"The instructions say 'make sure you are certain before proceeding'.",neutral_statement
+"The title of the article is 'The Certainty of Uncertainty'.",neutral_statement
+"The final step is to resolve any remaining confusion.",neutral_statement
+"The manager seemed certain about the new deadline.",neutral_statement
